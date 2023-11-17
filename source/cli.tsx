@@ -14,10 +14,10 @@ const cli = meow(
 
 	Options
 		--apiKey  OpenAI API key
-        --systemRules  System rules used to configure the chatbot
+        --instructions  Instructions for the chatbot
 
 	Examples
-	  $ openai-term-chat --systemRules 'You are a Javascript developer'
+	  $ openai-term-chat --instructions 'You are a Javascript developer'
 `,
 	{
 		importMeta: import.meta,
@@ -25,7 +25,7 @@ const cli = meow(
 			apiKey: {
 				type: 'string',
 			},
-			systemRules: {
+			instructions: {
 				type: 'string',
 			},
 		},
@@ -34,11 +34,12 @@ const cli = meow(
 
 config()
 
-const {apiKey, systemRules} = cli.flags
+const {apiKey, instructions} = cli.flags
 
 const store = new ChatStore({ 
     apiKey: apiKey || process.env['API_KEY'] || 'MISSING_KEY',
-    systemRules
+    instructions
 })
 
 render(<App store={store} />);
+

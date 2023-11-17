@@ -4,19 +4,19 @@ import _ from 'lodash'
 
 type Role = 'system' | 'assistant' | 'user' | 'function' | 'tool'
 
-type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam
+type MessageItem = OpenAI.Chat.Completions.ChatCompletionMessageParam
 
-type Completion = {
+type CompletionItem = {
     completion: OpenAI.Chat.Completions.ChatCompletion
     choiceIndex: number
 }
 
-type HistoryItem = Message | Completion
+type HistoryItem = MessageItem | CompletionItem
 
 type State = {
     version: number
     history: HistoryItem[]
-    lastPrompt?: Message
+    lastPrompt?: MessageItem
     awaiting: boolean
     error?: Error
 }
@@ -37,11 +37,17 @@ type ErrorAction = {
     err: unknown
 }
 
-type Action = AddPromptAction | AddCompletionAction | ErrorAction
+type SelectChoiceAction = {
+    type: 'selectChoice'
+    completion: CompletionItem
+    index: number
+}
+
+type Action = AddPromptAction | AddCompletionAction | ErrorAction | SelectChoiceAction
 
 type ChatStoreProps = {
     apiKey: string
-    systemRules?: string
+    instructions?: string
 }
 
 class ChatStore {
@@ -57,12 +63,12 @@ class ChatStore {
     constructor(props: ChatStoreProps) {
         const {
             apiKey,
-            systemRules
+            instructions
         } = props
 
         const initialState: State = {
             version: 0,
-            history: systemRules ? [{role: 'system', content: systemRules}] : [],
+            history: instructions ? [{role: 'system', content: instructions}] : [],
             awaiting: false
         }
 
@@ -72,7 +78,7 @@ class ChatStore {
             switch (action?.type) {
                 case 'addPrompt': {
                     const { content } = action,
-                        lastPrompt: Message = {role:'user', content}
+                        lastPrompt: MessageItem = {role:'user', content}
                     changes = {
                         history: [...state.history, lastPrompt], 
                         lastPrompt,
@@ -103,7 +109,17 @@ class ChatStore {
                     }
                 }
                     break
-            }    
+
+                case 'selectChoice': {
+                    const {completion, index} = action
+
+                    changes = {
+                        history: state.history.map((item) => 
+                            item === completion ? { ...completion, choiceIndex: index } : item)
+                    }
+                }
+                    break;
+            }
 
             return changes ? {...state, ...changes, version: state.version + 1} : state;
         }
@@ -144,7 +160,8 @@ class ChatStore {
     
                         const completion = await openai.chat.completions.create({
                             messages,
-                            model: 'gpt-3.5-turbo'
+                            model: 'gpt-3.5-turbo',
+                            n: 3
                         })
     
                         return { type: 'addCompletion', completion }    
@@ -200,8 +217,12 @@ class ChatStore {
             this.dispatch({type: 'addPrompt', content})
         }
     }
+
+    selectChoice(completion: CompletionItem, index: number) {
+        this.dispatch({type: 'selectChoice', completion, index})
+    }
 }
 
 export default ChatStore
 
-export type {HistoryItem, Role, Message, Completion}
+export type {Role, HistoryItem, MessageItem, CompletionItem}
