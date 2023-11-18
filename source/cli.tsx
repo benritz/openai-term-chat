@@ -49,10 +49,10 @@ const {apiKey, instructions, choices, model} = cli.flags
 
 const instance = render(<App 
     apiKey={apiKey || process.env['API_KEY']} 
-    model={model}
+    model={model || 'gpt-3.5-turbo'}
     modelOptions={modelOptions}
     instructions={instructions}
-    choices={choices}
+    choices={choices || 1}
     choicesOptions={choicesOptions}
 />)
 

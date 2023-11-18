@@ -51,6 +51,7 @@ export default function App(props: AppProps) {
                 <Box gap={1}>
                     <Text>Model:</Text>
                     <SelectInput<string> 
+                        initialIndex={props.modelOptions.findIndex((item) => item === model)}
                         items={props.modelOptions.map((item) => ({value: item, label: item}))} 
                         onSelect={(item) => {
                             setModel(item.value)
@@ -71,6 +72,7 @@ export default function App(props: AppProps) {
                 <Box gap={1}>
                     <Text>Choices:</Text>
                     <SelectInput<number> 
+                        initialIndex={props.choicesOptions.findIndex((item) => item === choices)}
                         items={props.choicesOptions.map((item) => ({value: item, label: item.toString()}))} 
                         onSelect={(item) => {
                             setChoices(item.value)
