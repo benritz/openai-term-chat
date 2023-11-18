@@ -48,6 +48,8 @@ type Action = AddPromptAction | AddCompletionAction | ErrorAction | SelectChoice
 type ChatStoreProps = {
     apiKey: string
     instructions?: string
+    choices?: number
+    model?: string
 }
 
 class ChatStore {
@@ -63,7 +65,9 @@ class ChatStore {
     constructor(props: ChatStoreProps) {
         const {
             apiKey,
-            instructions
+            instructions,
+            model,
+            choices
         } = props
 
         const initialState: State = {
@@ -160,8 +164,8 @@ class ChatStore {
     
                         const completion = await openai.chat.completions.create({
                             messages,
-                            model: 'gpt-3.5-turbo',
-                            n: 3
+                            model: model || 'gpt-3.5-turbo',
+                            n: choices || 1
                         })
     
                         return { type: 'addCompletion', completion }    
@@ -197,6 +201,19 @@ class ChatStore {
         this._actions$.complete()
     }
 
+    // Props
+    // set instructions(instructions: string) {
+    //     this._props.instructions = instructions
+    // }
+
+    // set model(model: string) {
+    //     this._props.model = model
+    // }
+
+    // set choices(choices: number) {
+    //     this._props.choices = choices
+    // }
+
     // Selectors
     get history$() {
         return this._history$
@@ -225,4 +242,4 @@ class ChatStore {
 
 export default ChatStore
 
-export type {Role, HistoryItem, MessageItem, CompletionItem}
+export type {ChatStoreProps, Role, HistoryItem, MessageItem, CompletionItem}
