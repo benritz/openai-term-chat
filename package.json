@@ -2,7 +2,6 @@
 	"name": "openai-term-chat",
 	"version": "0.0.0",
 	"license": "MIT",
-	"bin": "dist/cli.js",
 	"type": "module",
 	"engines": {
 		"node": ">=16"
@@ -10,9 +9,13 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc --watch",
-		"start": "node dist/cli.js",
+		"start": "tsc && node .",
 		"test": "prettier --check . && xo && ava"
 	},
+    "main": "dist/cli.js",
+    "bin": {
+        "openai-term-chat": "./dist/cli.js"
+    },
 	"files": [
 		"dist"
 	],

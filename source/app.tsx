@@ -38,6 +38,8 @@ export default function App(props: AppProps) {
 
 	return (
         <Box flexDirection='column' gap={1}>
+            <Text>Welcome to OpenAI chat</Text>
+
             {configStep === ConfigStep.ApiKeyEntry && 
                 <Box gap={1}>
                     <Text>API key:</Text>
