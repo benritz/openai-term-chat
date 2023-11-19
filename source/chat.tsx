@@ -51,30 +51,40 @@ function Message({item}: MessageProps) {
 
 type CompletionChoiceProps = {
     item: CompletionItem
+    allowChoiceSelection: boolean
     onChoiceChange?: (index: number) => void
 }
 
-function CompletionChoice({item, onChoiceChange}: CompletionChoiceProps) {
+function CompletionChoice({item, allowChoiceSelection, onChoiceChange}: CompletionChoiceProps) {
     const {isFocused} = useFocus()
-    
+
     const { completion, choiceIndex } = item,
         {choices} = completion,
         choice = choices.find(({index}) => index === choiceIndex)
 
-    return <Box flexDirection='column' gap={1}>
+    return <Box flexDirection='column'>
         <Text color={getColourForRole('assistant')}>{getDisplayTextForRole('assistant')}</Text>
-        {choices.length > 1 && 
-        <Box gap={1}>
-            <Text>Choose the reply</Text>
-            <SelectInput 
-                isFocused={isFocused}
-                items={choices.map(({index}) => ({label: index === 0 ? 'Preferred' : `Alternative ${index}`, value: index}))} 
-                onSelect={(item) => onChoiceChange?.(item.value)} 
-            />
-        </Box>
-        }
 
-        {choice && <Text>{typeof choice.message.content === 'string' ? choice.message.content : '<unsupported type>'}</Text>}
+        {allowChoiceSelection && <>
+            {choices.length > 1 && 
+                <Box gap={1}>
+                    <Text>Choose the reply</Text>
+                    <SelectInput 
+                        isFocused={isFocused}
+                        items={choices.map(({index}) => ({label: index === 0 ? 'Preferred' : `Alternative ${index}`, value: index}))} 
+                        onSelect={(item) => onChoiceChange?.(item.value)} 
+                    />
+                </Box>}
+
+            {choice && <Text>{typeof choice.message.content === 'string' ? choice.message.content : '<unsupported type>'}</Text>}
+        </>}
+
+        {!allowChoiceSelection && <Box flexDirection='column' gap={1}>
+            {choices.map((choice) => <Box flexDirection='column'>
+                {choices.length > 1 && <Text color={getColourForRole('assistant')}>{choice.index === 0 ? 'Preferred' : `Alternative ${choice.index}`}</Text>}
+                <Text>{typeof choice.message.content === 'string' ? choice.message.content : '<unsupported type>'}</Text>
+            </Box>)}
+        </Box>}
     </Box>
 }
 
@@ -119,6 +129,7 @@ export default function Chat({store}: ChatProps) {
                             <CompletionChoice 
                                 key={n}
                                 item={item} 
+                                allowChoiceSelection={false}
                                 onChoiceChange={(index) => store.selectChoice(item, index)}
                             />
                     )}

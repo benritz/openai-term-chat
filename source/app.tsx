@@ -21,12 +21,12 @@ const getChatStore = (props: ChatStoreProps) => {
     return chatStore
 }
 
-enum Step {
+enum ConfigStep {
     ApiKeyEntry,
     InstructionsEntry,
     ChoicesEntry,
     ModelEntry,
-    Chat
+    Ready
 }
 
 export default function App(props: AppProps) {
@@ -34,20 +34,20 @@ export default function App(props: AppProps) {
     const [model, setModel] = useState(props.model)
     const [instructions, setInstructions] = useState(props.instructions || '')
     const [choices, setChoices] = useState(props.choices)
-    const [step, setStep] = useState(Step.ApiKeyEntry)
+    const [configStep, setConfigStep] = useState(ConfigStep.ApiKeyEntry)
 
 	return (
         <Box flexDirection='column' gap={1}>
-            {step === Step.ApiKeyEntry && 
+            {configStep === ConfigStep.ApiKeyEntry && 
                 <Box gap={1}>
                     <Text>API key:</Text>
                     <TextInput 
                         value={apiKey} 
                         onChange={(s) => setApiKey(s)} 
-                        onSubmit={() => setStep(Step.ModelEntry)}
+                        onSubmit={() => setConfigStep(ConfigStep.ModelEntry)}
                         />
                 </Box> }
-            {step === Step.ModelEntry &&     
+            {configStep === ConfigStep.ModelEntry &&     
                 <Box gap={1}>
                     <Text>Model:</Text>
                     <SelectInput<string> 
@@ -55,20 +55,20 @@ export default function App(props: AppProps) {
                         items={props.modelOptions.map((item) => ({value: item, label: item}))} 
                         onSelect={(item) => {
                             setModel(item.value)
-                            setStep(Step.InstructionsEntry)
+                            setConfigStep(ConfigStep.InstructionsEntry)
                         }}
                         />
                 </Box>}
-            {step === Step.InstructionsEntry &&     
+            {configStep === ConfigStep.InstructionsEntry &&     
                 <Box gap={1}>
                     <Text>Instructions:</Text>
                     <TextInput 
                         value={instructions} 
                         onChange={(s) => setInstructions(s)} 
-                        onSubmit={() => setStep(Step.ChoicesEntry)}
+                        onSubmit={() => setConfigStep(ConfigStep.ChoicesEntry)}
                         />
                 </Box>}
-            {step === Step.ChoicesEntry && 
+            {configStep === ConfigStep.ChoicesEntry && 
                 <Box gap={1}>
                     <Text>Choices:</Text>
                     <SelectInput<number> 
@@ -76,11 +76,11 @@ export default function App(props: AppProps) {
                         items={props.choicesOptions.map((item) => ({value: item, label: item.toString()}))} 
                         onSelect={(item) => {
                             setChoices(item.value)
-                            setStep(Step.Chat)
+                            setConfigStep(ConfigStep.Ready)
                         }}
                         />
                 </Box> }
-            {step === Step.Chat && 
+            {configStep === ConfigStep.Ready && 
                 <Chat store={getChatStore({apiKey, instructions, choices, model})} /> }
         </Box>
 	)
